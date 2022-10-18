@@ -5,16 +5,42 @@ import "forge-std/Test.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {DAO} from "src/DAO.sol";
 
+interface ISocksNFT {
+    function minter() external view returns (address);
+
+    function totalSupply() external view returns (uint256);
+
+    function ownerOf(uint256 tokenId) external view returns (address);
+
+    function mint(address to) external returns (bool);
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes calldata data
+    ) external;
+
+    function approve(address approved, uint256 tokenId) external;
+
+    function setApprovalForAll(address _operator, bool _approved) external;
+
+    function balanceOf(address) external view returns (uint256);
+}
+
 contract DAOTest is Test {
     DAO public immutable dao;
     ERC20 public immutable socks;
+    ISocksNFT public immutable socksNFT;
 
     event Deposit(address indexed depositor, uint256 amount);
+    event DepositNFT(address indexed depositor, uint256 tokenId);
     event Withdraw(address indexed withdrawer, uint256 amount);
 
     constructor() {
         dao = new DAO();
         socks = dao.SOCKS();
+        socksNFT = ISocksNFT(address(dao.SOCKS_NFT()));
 
         // Fund this contract with $SOCKS from an account with an existing balance
         address socksSource = address(socks);
@@ -23,6 +49,13 @@ contract DAOTest is Test {
         vm.prank(socksSource);
 
         socks.transfer(address(this), socksBalance);
+
+        // Fund this contract with a $SOCKS NFT
+        address socksNFTMinter = socksNFT.minter();
+
+        vm.prank(socksNFTMinter);
+
+        socksNFT.mint(address(this));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -132,5 +165,29 @@ contract DAOTest is Test {
             memberSocksAfterWithdrawal
         );
         assertEq(balanceBeforeWithdrawal + amount, balanceAfterWithdrawal);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            depositNFT TESTS
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+        @notice Test success: deposit SOCKS NFT
+     */
+    function testDepositNFT() external {
+        uint256 tokenId = socksNFT.totalSupply() - 1;
+
+        socksNFT.approve(address(dao), tokenId);
+
+        vm.expectEmit(true, false, false, true, address(dao));
+
+        emit DepositNFT(address(this), tokenId);
+
+        dao.depositNFT(tokenId);
+
+        (, uint256[] memory sockNFTs) = dao.getMember(address(this));
+
+        assertEq(tokenId, sockNFTs[0]);
+        assertEq(address(dao), socksNFT.ownerOf(tokenId));
     }
 }
