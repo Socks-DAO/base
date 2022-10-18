@@ -19,6 +19,7 @@ contract DAO is ReentrancyGuard {
     mapping(address => Member) public members;
 
     event Deposit(address indexed depositor, uint256 amount);
+    event Withdraw(address indexed withdrawer, uint256 amount);
 
     error ZeroAmount();
 
@@ -50,5 +51,19 @@ contract DAO is ReentrancyGuard {
         members[msg.sender].socks += amount;
 
         emit Deposit(msg.sender, amount);
+    }
+
+    /**
+        @notice Withdraw SOCKS
+        @param  amount  uint256  SOCKS amount
+     */
+    function withdraw(uint256 amount) external nonReentrant {
+        if (amount == 0) revert ZeroAmount();
+
+        members[msg.sender].socks -= amount;
+
+        SOCKS.safeTransfer(msg.sender, amount);
+
+        emit Withdraw(msg.sender, amount);
     }
 }
