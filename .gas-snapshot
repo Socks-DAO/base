@@ -1,0 +1,2 @@
+DAOTest:testCannotDepositAmountZeroAmount() (gas: 11258)
+DAOTest:testDeposit() (gas: 74818)
