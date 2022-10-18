@@ -46,6 +46,7 @@ contract DAO is ReentrancyGuard {
     function deposit(uint256 amount) external nonReentrant {
         if (amount == 0) revert ZeroAmount();
 
+        // Reverts if user balance is insufficient
         SOCKS.safeTransferFrom(msg.sender, address(this), amount);
 
         members[msg.sender].socks += amount;
@@ -60,6 +61,7 @@ contract DAO is ReentrancyGuard {
     function withdraw(uint256 amount) external nonReentrant {
         if (amount == 0) revert ZeroAmount();
 
+        // Reverts if underflows (i.e. withdrawal exceeds deposits)
         members[msg.sender].socks -= amount;
 
         SOCKS.safeTransfer(msg.sender, amount);
