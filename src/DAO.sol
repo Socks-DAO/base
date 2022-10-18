@@ -24,6 +24,7 @@ contract DAO is ReentrancyGuard {
     event Deposit(address indexed depositor, uint256 amount);
     event DepositNFT(address indexed depositor, uint256 tokenId);
     event Withdraw(address indexed withdrawer, uint256 amount);
+    event WithdrawNFT(address indexed withdrawer, uint256 tokenId);
 
     error ZeroAmount();
 
@@ -83,6 +84,26 @@ contract DAO is ReentrancyGuard {
         members[msg.sender].socksNFT.push(tokenId);
 
         emit DepositNFT(msg.sender, tokenId);
+    }
+
+    /**
+        @notice Withdraw SOCKS NFT
+        @param  index  uint256  Index of the member's socksNFT token ID
+     */
+    function withdrawNFT(uint256 index) external nonReentrant {
+        uint256[] storage socksNFT = members[msg.sender].socksNFT;
+        uint256 lastIndex = socksNFT.length - 1;
+        uint256 tokenId = socksNFT[index];
+
+        if (index != lastIndex) {
+            // Set the element at removalIndex to the last element
+            socksNFT[index] = socksNFT[lastIndex];
+        }
+
+        socksNFT.pop();
+        SOCKS_NFT.transferFrom(address(this), msg.sender, tokenId);
+
+        emit WithdrawNFT(msg.sender, tokenId);
     }
 
     /**

@@ -1,6 +1,1 @@
-DAOTest:testCannotDepositAmountZeroAmount() (gas: 11303)
-DAOTest:testCannotWithdrawAmountExceedsDeposits() (gas: 17981)
-DAOTest:testCannotWithdrawAmountZeroAmount() (gas: 11360)
-DAOTest:testDeposit(uint8) (runs: 256, μ: 78016, ~: 78023)
-DAOTest:testDepositNFT() (gas: 136366)
-DAOTest:testWithdraw(uint8) (runs: 256, μ: 86811, ~: 86811)
+DAOTest:testWithdrawNFT() (gas: 139814)

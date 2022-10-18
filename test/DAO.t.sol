@@ -190,4 +190,27 @@ contract DAOTest is Test {
         assertEq(tokenId, sockNFTs[0]);
         assertEq(address(dao), socksNFT.ownerOf(tokenId));
     }
+
+    /*//////////////////////////////////////////////////////////////
+                            withdrawNFT TESTS
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+        @notice Test success: withdraw SOCKS NFT
+     */
+    function testWithdrawNFT() external {
+        uint256 tokenId = socksNFT.totalSupply() - 1;
+
+        socksNFT.approve(address(dao), tokenId);
+        dao.depositNFT(tokenId);
+
+        (, uint256[] memory sockNFTs) = dao.getMember(address(this));
+
+        assertEq(tokenId, sockNFTs[0]);
+        assertEq(address(dao), socksNFT.ownerOf(tokenId));
+
+        dao.withdrawNFT(0);
+
+        assertEq(address(this), socksNFT.ownerOf(tokenId));
+    }
 }
